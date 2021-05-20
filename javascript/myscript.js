@@ -29,7 +29,7 @@ let right_arrow
 let left_arrow
 let up_arrow
 let down_arrow
-
+let ibtn
 function init(){
 	//event
 
@@ -42,7 +42,9 @@ function init(){
 	left_arrow=new arrow({position:{x:100,y:wh/2},scale:{x:-1,y:1}})
 	up_arrow=new arrow({position:{x:250,y:30},rotation:-Math.PI/2,scale:{x:0.5,y:0.5}})
 	down_arrow=new arrow({position:{x:250,y:70},rotation:Math.PI/2,scale:{x:0.5,y:0.5}})
-
+	ibtn=new Circle({position:{x:40,y:680},color:{fill:'black',stroke:'rgb(214,255,214)'},stroke:true})
+	information=new information({position:{x:200,y:600},visible:false})
+	information_=new information_({position:{x:125,y:600},visible:false,scale:{x:-1,y:1}})
 
 
 	line=new judge_line({position:{x:ww/2,y:600}})
@@ -148,12 +150,30 @@ function update(){
 function draw(){
 	background('black')
 	if(mode===0){
+		ibtn.draw()
+		ctx.font='40px New Century Schoolbook'
+		ctx.fillStyle='white'
+		ctx.fillText('i',33,693)
+		information.draw()
+		information_.draw()
+		ctx.fillStyle='yellow'
+		ctx.font='30px New Century Schoolbook'
+		if(information_.visible){
+			ctx.fillText('Q',13,520)
+			ctx.fillText('E',63,550)
+			ctx.fillText('F',115,580)
+			ctx.fillText('J',115,667)
+			ctx.fillText('I',168,642)
+			ctx.fillText('P',215,670)
+		}
+		
+		ctx.fillStyle='white'
+
 		up_arrow.draw()
 		down_arrow.draw()
 		right_arrow.draw()
 		left_arrow.draw()
 		ctx.font='80px Verdana'
-		ctx.fillStyle='white'
 		ctx.fillText(name_array[choose],ww/2-100,wh/2-50)
 		ctx.font='40px Verdana'
 		ctx.fillText('Long '+Math.floor(long_array[choose]/1000/60)+'m'+Math.floor(long_array[choose]/1000%60)+'s',ww/2-100,wh/2)
@@ -296,6 +316,17 @@ function keydown(e){
 		passage_[2].visible=true
 		isget(5)
 	}
+	if(keyid==='KeyI'&&mode===0){
+		if(information_.visible){
+			information_.visible=false
+			information.visible=false
+
+		}else{
+			information_.visible=true
+			information.visible=true
+		}
+		
+	}
 	if(keyid==='ArrowRight'){
 		if(mode===0){
 			choose+=1
@@ -392,6 +423,13 @@ function click(e){
 				choose=name_array.length-1
 			}
 		}
+	}
+	if(ibtn.ispointinpath(e.pageX,e.pageY)&&information.visible===false){
+		information_.visible=true
+		information.visible=true
+	}else if(information.ispointinpath(e.pageX,e.pageY)&&information.visible){
+		information_.visible=false
+		information.visible=false
 	}
 }
 init()

@@ -1,14 +1,13 @@
 const canvas=document.getElementById('mycanvas');
 const ctx=canvas.getContext('2d');
-ww=window.innerWidth
-wh=window.innerHeight
-canvas.width=ww
-canvas.height=wh
+let ww=1500
+let wh=750
+mysize()
 mx=ww/2
 my=wh/2
 let fps=100
 
-//全域變數
+//全域變數 
 let rr
 let right_rr
 let left_rr
@@ -60,40 +59,53 @@ function init(){
 	window.addEventListener('keydown',keydown)
 	window.addEventListener('keyup',keyup)
 	window.addEventListener('click',click)
+	window.addEventListener('resize',mysize)
 }
 function update(){
 
 	if(mode!==0){
 		if(tt>=long_array[mode-1]){
-			
-			
+		//如果當前時間>=目前歌曲的時長
 			if(current_score>score_array[mode-1]){
 				score_array[mode-1]=current_score
 			}
+			//如果目前分數比最高分數高就將最高分數設為當前分數
 			mode=0
+			//將模式設為零(選擇歌曲的畫面)
 			current_score=0
+			//分數歸零
 			audio.pause()
 			audio.currentTime=0
-		
+			//將音樂暫停並將時間歸零(下次撥放時將從頭撥放)
 		}
 		
 		tt+=10
+
+
+
 		if(tt!==istimeback){
 			istimeon()
 			if(tt>0&&tt%1000===0&&audio.ended===false){
+
+
+
 				if(Math.abs(Math.floor(audio.currentTime*1000)-tt)>10){
+				//如果歌曲時間與遊戲時間的偏差大於10毫秒
 					let kk=audio.currentTime
 					if(Math.floor(kk*100)*10-tt>0){
+					//如果歌曲比較快
 						for(let y=0;y<(Math.floor(kk*100)*10-tt)/10;y++){
-							tt+=10
-							istimeon()
+							tt+=10//將遊戲當前時間調快
+							istimeon()//檢測在跳過的時間中是否有要加入方塊
 						}
-
-
+						
+					
 					}else{
-						tt+=Math.floor(kk*100)*10-tt
-						istimeback=tt+10
+					//否則(遊戲比歌曲快)	
+						tt+=Math.floor(kk*100)*10-tt//將遊戲時間倒退
+						istimeback=tt+10//標記時間點(以免同一個時間點執行兩次)
 					}
+					
 					
 					
 				}
@@ -223,19 +235,28 @@ requestAnimationFrame(draw)
 
 function istimeon(){
 	for(let i=0;i<6;i++){
+	//對每個軌道執行(左右邊各兩條再加上中間的向左符號以及向右符號)
+
 		let new_rr
+
 		if(i<4){
+		//如果是執行左邊兩條或右邊兩條(正常方塊)
+
 			if(tt===all_time[i][0]-700/drop_speed*10){
+			//如果當前時間=此軌道應最早落下的方塊落至判定線的時間(此軌道方塊的時間陣列的第一項)-方塊落下所需花費的時間
 				
 				new_rr=new drop_rect({position:{x:550+100*i,y:-100},scale:{x:1,y:0.1}})
 				if(i>1){
 					new_rr.position.x+=100
 				}
 				all_rr[i].push(new_rr)
+				//在Y座標-100,此軌道X座標的位置加入方塊
 
 				all_time[i].splice(0,1)
+				//將此軌道方塊的時間陣列的第一項刪除(已經加入)
 			}
 		}else{
+
 			if(tt===all_time[i][0]-700/drop_speed*10){
 				if(i===4){
 					new_rr=new left_rect({position:{x:750,y:-100},scale:{x:1,y:1}})
@@ -431,6 +452,46 @@ function click(e){
 		information_.visible=false
 		information.visible=false
 	}
+	if(e.pageX>ww/2-200&&e.pageX<ww/2+2000&&e.pageY>wh-150){
+		if(mode===0){			
+			all_time=[[],[],[],[],[],[]]
+			for(let i=0;i<time_array[choose].length;i++){
+				for(let y=0;y<time_array[choose][i].length;y++){
+					all_time[i].push(time_array[choose][i][y])
+				}
+
+			}
+			drop_speed=speed_array[choose]
+			tt=-700/drop_speed*10-bfs
+			all_rr=[[],[],[],[],[],[]]
+			
+			mode=choose+1
+			
+
+		}
+
+	}
+}
+function mysize(){
+	if(window.innerHeight/window.innerWidth>=wh/ww){
+		canvas.style.width=window.innerWidth+'px'
+		canvas.style.height=wh*window.innerWidth/ww+'px'
+		canvas.width=window.innerWidth
+		canvas.height=wh*window.innerWidth/ww
+	}else{
+		canvas.style.width=ww*window.innerHeight/wh+'px'
+		canvas.style.height=window.innerHeight+'px'
+		canvas.width=ww*window.innerHeight/wh
+		canvas.height=window.innerHeight
+	}
+	ctx.restore()
+	ctx.save()
+	if(window.innerHeight/window.innerWidth>=wh/ww){
+		ctx.scale(window.innerWidth/ww,window.innerWidth/ww)
+	}else{
+		ctx.scale(window.innerHeight/wh,window.innerHeight/wh)
+	}
+	
 }
 init()
 
